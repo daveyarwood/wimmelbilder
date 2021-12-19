@@ -1,0 +1,20 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src/dev"
+  "src/main"
+  "src/test"]
+
+ :dependencies
+ []
+
+ :builds
+ {:app
+  {:target   :browser
+   :modules  {:main {:init-fn wimmelbilder.app/init}}
+   :devtools {:after-load wimmelbilder.app/reload}}}
+
+ :nrepl
+ {:port 9002}
+
+ :dev-http
+ {8080 "public/"}}
