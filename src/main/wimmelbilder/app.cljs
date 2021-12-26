@@ -53,15 +53,15 @@
   []
   (clear-canvas!)
   (load-image!
-    "img/forest.gif"
+    "img/background/forest.gif"
     (fn [forest-image]
       (let [ctx (.getContext canvas "2d")]
         (draw-image! ctx forest-image 0 0)
         (load-image!
-          "img/doge.png"
+          "img/sprite/doge.png"
           (fn [doge-image]
             (load-image!
-              "img/doge-flipped.png"
+              "img/sprite/doge-flipped.png"
               (fn [doge-flipped-image]
                 (dotimes [_ 100]
                   (let [[x y] (random-opaque-coordinate)
@@ -75,7 +75,7 @@
                       y
                       0.075)))))))
         (load-image!
-          "img/doge-scarf.png"
+          "img/sprite/doge-scarf.png"
           (fn [doge-image]
             (let [[width height] (random-opaque-coordinate)]
               (draw-image!
