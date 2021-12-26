@@ -1,16 +1,25 @@
 (ns wimmelbilder.app)
 
+(defn root
+  []
+  (js/document.getElementById "root"))
+
 (defn element
   [element-type & [attributes]]
   (let [e (js/document.createElement element-type)]
     (js/Object.assign e (clj->js attributes))))
 
-(def canvas (js/document.getElementById "canvas"))
-
-(defn clear-canvas!
+(defn canvas
   []
-  (let [ctx (.getContext canvas "2d")]
-    (.clearRect ctx 0 0 (.-width canvas) (.-height canvas))))
+  (first (.getElementsByTagName (root) "canvas")))
+
+(defn replace-canvas!
+  [width height]
+  (when-let [c (canvas)]
+    (.remove c))
+  (.appendChild
+    (root)
+    (element "canvas" {:id "canvas" :width width, :height height})))
 
 (defn load-image!
   [image-path callback]
@@ -33,11 +42,15 @@
     (* (.-width image) (or scale-factor 1))
     (* (.-height image) (or scale-factor 1))))
 
+;; TODO: re-think this
 (defn random-opaque-coordinate
   "Returns a [width height] tuple for a point on the canvas that is
    non-transparent."
   []
-  (let [ctx
+  (let [canvas
+        (canvas)
+
+        ctx
         (.getContext canvas "2d")
 
         random-coordinates
@@ -55,14 +68,47 @@
             [x y]
             (recur (random-coordinates)))))))
 
+(defn window-dimensions
+  []
+  (let [width  (or (.. js/window -innerWidth)
+                   (.. js/document -documentElement -clientWidth)
+                   (.. js/document -body -clientWidth))
+        height (or (.. js/window -innerHeight)
+                   (.. js/document -documentElement -clientHeight)
+                   (.. js/document -body -clientHeight))]
+    [width height]))
+
+(defn scaled-to-fit-screen
+  [image-width image-height]
+  (let [[screen-width screen-height]
+        (window-dimensions)
+
+        width-scale-factor
+        (/ screen-width image-width)
+
+        height-scale-factor
+        (/ screen-height image-height)
+
+        scale-factor
+        (min width-scale-factor height-scale-factor)]
+    [(* image-width scale-factor)
+     (* image-height scale-factor)
+     scale-factor]))
+
 (defn render-app!
   []
-  (clear-canvas!)
   (load-image!
-    (fn [forest-image]
-      (let [ctx (.getContext canvas "2d")]
-        (draw-image! ctx forest-image 0 0)
     "img/bg/2.jpeg"
+    (fn [bg-image]
+      (let [[width height scale-factor]
+            (scaled-to-fit-screen (.-width bg-image) (.-height bg-image))
+
+            _
+            (replace-canvas! width height)
+
+            ctx
+            (.getContext (canvas) "2d")]
+        (draw-image! ctx bg-image 0 0 scale-factor)
         (load-image!
           "img/sprite/doge.png"
           (fn [doge-image]
