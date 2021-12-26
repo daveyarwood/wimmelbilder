@@ -98,13 +98,12 @@
                 height
                 0.2))))))))
 
-;; FIXME: This doesn't always render on page load
 (defn init []
   (println "init")
-  (.addEventListener
-    js/document
-    "DOMContentLoaded"
-    render-app!))
+  (let [render! #(js/window.setTimeout render-app! 0)]
+    (if (= "complete" (.-readyState js/document))
+      (render!)
+      (.addEventListener js/window "load" render!))))
 
 (defn reload []
   (println "reload")
