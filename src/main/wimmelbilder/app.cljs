@@ -59,10 +59,10 @@
   []
   (clear-canvas!)
   (load-image!
-    "img/background/forest.gif"
     (fn [forest-image]
       (let [ctx (.getContext canvas "2d")]
         (draw-image! ctx forest-image 0 0)
+    "img/bg/2.jpeg"
         (load-image!
           "img/sprite/doge.png"
           (fn [doge-image]
