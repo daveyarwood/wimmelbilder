@@ -14,4 +14,4 @@
 npx shadow-cljs watch app
 ```
 
-2. Open `public/index.html` in your browser of choice.
+2. Open `http://localhost:8080` in your browser of choice.
