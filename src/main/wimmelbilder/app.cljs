@@ -1,38 +1,21 @@
 (ns wimmelbilder.app)
 
-(defn root
-  []
-  (js/document.getElementById "root"))
+(defn element
+  [element-type & [attributes]]
+  (let [e (js/document.createElement element-type)]
+    (js/Object.assign e (clj->js attributes))))
 
-(defn clear-root!
-  []
-  (let [root-node (root)]
-    (while (.-firstChild (root))
-      (.removeChild root-node (.-lastChild root-node)))))
+(def canvas (js/document.getElementById "canvas"))
 
-(defn add-canvas!
+(defn clear-canvas!
   []
-  (let [canvas (js/document.createElement "canvas")
-        _      (set! (.-id canvas) "canvas")
-        ;; TODO: dynamically re-draw everything based on the window size
-        _      (set! (.-width canvas) 800)
-        _      (set! (.-height canvas) 800)]
-    (.appendChild (root) canvas)))
-
-(defn canvas
-  []
-  (js/document.getElementById "canvas"))
-
-(defn img
-  [src]
-  (let [element (js/document.createElement "img")]
-    (set! (.-src element) src)
-    element))
+  (let [ctx (.getContext canvas "2d")]
+    (.clearRect ctx 0 0 (.-width canvas) (.-height canvas))))
 
 (defn load-image!
   [image-path callback]
-  (let [image (img image-path)]
-    (.addEventListener image "load" (callback image))))
+  (let [image (element "img" {:src image-path})]
+    (.addEventListener image "load" #(callback image))))
 
 (defn draw-image!
   [ctx image x y & [scale-factor]]
@@ -47,7 +30,7 @@
 (defn random-opaque-coordinate
   "Returns a [width height] tuple for a point on the canvas that is
    non-transparent."
-  [canvas]
+  []
   (let [ctx
         (.getContext canvas "2d")
 
@@ -55,42 +38,46 @@
         (fn []
           [(rand-int (.-width canvas))
            (rand-int (.-height canvas))])]
-    (loop [[x y] (random-coordinates)]
-      (let [image-data (.-data (.getImageData ctx x y 1 1))
-            r          (aget image-data 0)
-            g          (aget image-data 1)
-            b          (aget image-data 2)
-            a          (aget image-data 3)]
-        (if (and (pos? a) (not= [0 0 0] [r g b]))
-          [x y]
-          (recur (random-coordinates)))))))
+    (random-coordinates)
+    #_(loop [[x y] (random-coordinates)]
+        (let [image-data (.-data (.getImageData ctx x y 1 1))
+              r          (aget image-data 0)
+              g          (aget image-data 1)
+              b          (aget image-data 2)
+              a          (aget image-data 3)]
+          (if (and (pos? a) (not= [0 0 0] [r g b]))
+            [x y]
+            (recur (random-coordinates)))))))
 
 (defn render-app!
   []
-  (clear-root!)
-  (add-canvas!)
+  (clear-canvas!)
   (load-image!
     "img/forest.gif"
     (fn [forest-image]
-      (let [ctx (.getContext (canvas) "2d")]
+      (let [ctx (.getContext canvas "2d")]
         (draw-image! ctx forest-image 0 0)
-        (dotimes [_ 100]
-          (load-image!
-            (if (< (rand) 0.5)
-              "img/doge.png"
-              "img/doge-flipped.png")
-            (fn [doge-image]
-              (let [[width height] (random-opaque-coordinate (canvas))]
-                (draw-image!
-                  ctx
-                  doge-image
-                  width
-                  height
-                  0.075)))))
+        (load-image!
+          "img/doge.png"
+          (fn [doge-image]
+            (load-image!
+              "img/doge-flipped.png"
+              (fn [doge-flipped-image]
+                (dotimes [_ 100]
+                  (let [[x y] (random-opaque-coordinate)
+                        image (if (< (rand) 0.5)
+                                doge-image
+                                doge-flipped-image)]
+                    (draw-image!
+                      ctx
+                      image
+                      x
+                      y
+                      0.075)))))))
         (load-image!
           "img/doge-scarf.png"
           (fn [doge-image]
-            (let [[width height] (random-opaque-coordinate (canvas))]
+            (let [[width height] (random-opaque-coordinate)]
               (draw-image!
                 ctx
                 doge-image
