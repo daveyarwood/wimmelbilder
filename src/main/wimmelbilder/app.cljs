@@ -115,7 +115,7 @@
             (load-image!
               "img/sprite/doge-flipped.png"
               (fn [doge-flipped-image]
-                (dotimes [_ 100]
+                (dotimes [_ (* 300 scale-factor)]
                   (let [[x y] (random-opaque-coordinate)
                         image (if (< (rand) 0.5)
                                 doge-image
