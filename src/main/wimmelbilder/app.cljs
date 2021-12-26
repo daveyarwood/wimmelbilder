@@ -17,6 +17,12 @@
   (let [image (element "img" {:src image-path})]
     (.addEventListener image "load" #(callback image))))
 
+;; TODO: When support for OffscreenCanvas is added to Firefox, we could optimize
+;; this by drawing the image to an offscreen canvas with scaling and then
+;; drawing it to the actual canvas.
+;;
+;; Reference:
+;; https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
 (defn draw-image!
   [ctx image x y & [scale-factor]]
   (.drawImage
