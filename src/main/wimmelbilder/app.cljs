@@ -1,4 +1,6 @@
-(ns wimmelbilder.app)
+(ns wimmelbilder.app
+  (:require [clojure.core.async :as async])
+  (:require-macros [wimmelbilder.app :as app]))
 
 (defn root
   []
@@ -8,6 +10,28 @@
   [element-type & [attributes]]
   (let [e (js/document.createElement element-type)]
     (js/Object.assign e (clj->js attributes))))
+
+(def image-files
+  (app/image-files))
+
+(def background-files
+  (map #(str "img/bg/" %)
+       (app/background-files)))
+
+(def target-image
+  "img/sprite/doge-scarf.png")
+
+(def other-images
+  (->> image-files
+       (map #(str "img/sprite/" %))
+       (filter #(not= target-image %))))
+
+(defn load-image!
+  [image-path]
+  (let [ch    (async/chan)
+        image (element "img" {:src image-path})]
+    (.addEventListener image "load" #(async/put! ch image))
+    ch))
 
 (defn canvas
   []
@@ -20,11 +44,6 @@
   (.appendChild
     (root)
     (element "canvas" {:id "canvas" :width width, :height height})))
-
-(defn load-image!
-  [image-path callback]
-  (let [image (element "img" {:src image-path})]
-    (.addEventListener image "load" #(callback image))))
 
 ;; TODO: When support for OffscreenCanvas is added to Firefox, we could optimize
 ;; this by drawing the image to an offscreen canvas with scaling and then
@@ -95,47 +114,76 @@
      (* image-height scale-factor)
      scale-factor]))
 
+(def bg-specific-sprite-scale-factors
+  {#_#_"img/bg/4.png" 5})
+
 (defn render-app!
   []
-  (load-image!
-    "img/bg/2.jpeg"
-    (fn [bg-image]
-      (let [[width height scale-factor]
-            (scaled-to-fit-screen (.-width bg-image) (.-height bg-image))
+  (async/go
+    (let [background-file
+          (rand-nth background-files)
 
-            _
-            (replace-canvas! width height)
+          _
+          (prn :background-file background-file)
 
-            ctx
-            (.getContext (canvas) "2d")]
-        (draw-image! ctx bg-image 0 0 scale-factor)
-        (load-image!
-          "img/sprite/doge.png"
-          (fn [doge-image]
-            (load-image!
-              "img/sprite/doge-flipped.png"
-              (fn [doge-flipped-image]
-                (dotimes [_ (* 300 scale-factor)]
-                  (let [[x y] (random-opaque-coordinate)
-                        image (if (< (rand) 0.5)
-                                doge-image
-                                doge-flipped-image)]
-                    (draw-image!
-                      ctx
-                      image
-                      x
-                      y
-                      0.075)))))))
-        (load-image!
-          "img/sprite/doge-scarf.png"
-          (fn [doge-image]
-            (let [[width height] (random-opaque-coordinate)]
-              (draw-image!
-                ctx
-                doge-image
-                width
-                height
-                0.2))))))))
+          bg-sprite-scale-factor
+          (* (get bg-specific-sprite-scale-factors background-file 1)
+             ;; TODO: Replace this with an image-specific scale factor?
+             1.0)
+
+          bg-image-ch
+          (load-image! background-file)
+
+          target-image-ch
+          (load-image! target-image)
+
+          other-images-chs
+          (map load-image! other-images)
+
+          other-images
+          (atom [])
+
+          _
+          (dotimes [_ (count other-images-chs)]
+            (let [[image _channel] (async/alts! other-images-chs)]
+              (swap! other-images concat [image])))
+
+          bg-image
+          (async/<! bg-image-ch)
+
+          target-image
+          (async/<! target-image-ch)
+
+          other-images
+          @other-images
+
+          [width height bg-scale-factor]
+          (scaled-to-fit-screen (.-width bg-image) (.-height bg-image))
+
+          _
+          (replace-canvas! width height)
+
+          ctx
+          (.getContext (canvas) "2d")
+
+          _
+          (draw-image! ctx bg-image 0 0 bg-scale-factor)]
+       (dotimes [_ (* 300 bg-scale-factor)]
+         (let [[x y] (random-opaque-coordinate)
+               image (rand-nth other-images)]
+           (draw-image!
+             ctx
+             image
+             x
+             y
+             (* 0.075 bg-scale-factor bg-sprite-scale-factor))))
+       (let [[width height] (random-opaque-coordinate)]
+         (draw-image!
+           ctx
+           target-image
+           width
+           height
+           (* 0.2 bg-scale-factor bg-sprite-scale-factor))))))
 
 (defn init []
   (println "init")
