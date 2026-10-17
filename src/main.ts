@@ -25,8 +25,8 @@ const windowDimensions = (): [number, number] => {
   return [width, height]
 }
 
-const loadImage = (src: string): Promise<HTMLImageElement> => {
-  return new Promise((resolve, reject) => {
+const loadImage = (src: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
     const image = new Image()
     image.addEventListener('load', () => resolve(image))
     image.addEventListener('error', () =>
@@ -34,7 +34,6 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
     )
     image.src = src
   })
-}
 
 const replaceCanvas = (width: number, height: number): HTMLCanvasElement => {
   root.querySelector('canvas')?.remove()
@@ -48,13 +47,13 @@ const replaceCanvas = (width: number, height: number): HTMLCanvasElement => {
 export const randomCoordinate = (
   width: number,
   height: number,
-): [number, number] => {
-  return [Math.floor(Math.random() * width), Math.floor(Math.random() * height)]
-}
+): [number, number] => [
+  Math.floor(Math.random() * width),
+  Math.floor(Math.random() * height),
+]
 
-const randomItem = <T>(items: T[]): T => {
-  return items[Math.floor(Math.random() * items.length)]
-}
+const randomItem = <T>(items: T[]): T =>
+  items[Math.floor(Math.random() * items.length)]
 
 const scatter = (
   ctx: CanvasRenderingContext2D,

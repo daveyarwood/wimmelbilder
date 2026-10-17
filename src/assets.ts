@@ -32,15 +32,12 @@ const backgroundModules = import.meta.glob('./img/bg/*', {
   import: 'default',
 }) as Record<string, string>
 
-export const fileName = (path: string): string => {
-  return path.split('/').pop() ?? path
-}
+export const fileName = (path: string): string => path.split('/').pop() ?? path
 
-const urlsByName = (modules: Record<string, string>): Record<string, string> => {
-  return Object.fromEntries(
+const urlsByName = (modules: Record<string, string>): Record<string, string> =>
+  Object.fromEntries(
     Object.entries(modules).map(([path, url]) => [fileName(path), url]),
   )
-}
 
 const spriteUrlsByName = urlsByName(spriteModules)
 
@@ -57,21 +54,18 @@ export const otherSpriteUrls: string[] = Object.entries(spriteUrlsByName)
 export const spriteScale = (
   backgroundScaleFactor: number,
   backgroundSpriteScaleFactor: number,
-): number => {
-  return SPRITE_SCALE * backgroundScaleFactor * backgroundSpriteScaleFactor
-}
+): number =>
+  SPRITE_SCALE * backgroundScaleFactor * backgroundSpriteScaleFactor
 
 export const targetScale = (
   backgroundScaleFactor: number,
   backgroundSpriteScaleFactor: number,
-): number => {
-  return TARGET_SCALE * backgroundScaleFactor * backgroundSpriteScaleFactor
-}
+): number =>
+  TARGET_SCALE * backgroundScaleFactor * backgroundSpriteScaleFactor
 
 /** How many sprites to scatter over the background. Rounds up. */
-export const spriteCount = (backgroundScaleFactor: number): number => {
-  return Math.ceil(SPRITES_PER_SCREEN * backgroundScaleFactor)
-}
+export const spriteCount = (backgroundScaleFactor: number): number =>
+  Math.ceil(SPRITES_PER_SCREEN * backgroundScaleFactor)
 
 export interface FittedSize {
   width: number
