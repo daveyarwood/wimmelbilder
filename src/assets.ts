@@ -32,11 +32,11 @@ const backgroundModules = import.meta.glob('./img/bg/*', {
   import: 'default',
 }) as Record<string, string>
 
-export function fileName(path: string): string {
+export const fileName = (path: string): string => {
   return path.split('/').pop() ?? path
 }
 
-function urlsByName(modules: Record<string, string>): Record<string, string> {
+const urlsByName = (modules: Record<string, string>): Record<string, string> => {
   return Object.fromEntries(
     Object.entries(modules).map(([path, url]) => [fileName(path), url]),
   )
@@ -54,22 +54,22 @@ export const otherSpriteUrls: string[] = Object.entries(spriteUrlsByName)
   .filter(([name]) => name !== TARGET_SPRITE)
   .map(([, url]) => url)
 
-export function spriteScale(
+export const spriteScale = (
   backgroundScaleFactor: number,
   backgroundSpriteScaleFactor: number,
-): number {
+): number => {
   return SPRITE_SCALE * backgroundScaleFactor * backgroundSpriteScaleFactor
 }
 
-export function targetScale(
+export const targetScale = (
   backgroundScaleFactor: number,
   backgroundSpriteScaleFactor: number,
-): number {
+): number => {
   return TARGET_SCALE * backgroundScaleFactor * backgroundSpriteScaleFactor
 }
 
 /** How many sprites to scatter over the background. Rounds up. */
-export function spriteCount(backgroundScaleFactor: number): number {
+export const spriteCount = (backgroundScaleFactor: number): number => {
   return Math.ceil(SPRITES_PER_SCREEN * backgroundScaleFactor)
 }
 
@@ -80,12 +80,12 @@ export interface FittedSize {
 }
 
 /** The largest size the image can be drawn at while still fitting the screen. */
-export function scaledToFitScreen(
+export const scaledToFitScreen = (
   imageWidth: number,
   imageHeight: number,
   screenWidth: number,
   screenHeight: number,
-): FittedSize {
+): FittedSize => {
   const scaleFactor = Math.min(
     screenWidth / imageWidth,
     screenHeight / imageHeight,

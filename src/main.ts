@@ -13,7 +13,7 @@ import {
 
 const root = document.getElementById('root') as HTMLElement
 
-function windowDimensions(): [number, number] {
+const windowDimensions = (): [number, number] => {
   const width =
     window.innerWidth ||
     document.documentElement.clientWidth ||
@@ -25,7 +25,7 @@ function windowDimensions(): [number, number] {
   return [width, height]
 }
 
-function loadImage(src: string): Promise<HTMLImageElement> {
+const loadImage = (src: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const image = new Image()
     image.addEventListener('load', () => resolve(image))
@@ -36,7 +36,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-function replaceCanvas(width: number, height: number): HTMLCanvasElement {
+const replaceCanvas = (width: number, height: number): HTMLCanvasElement => {
   root.querySelector('canvas')?.remove()
   const canvas = document.createElement('canvas')
   canvas.width = width
@@ -45,22 +45,22 @@ function replaceCanvas(width: number, height: number): HTMLCanvasElement {
   return canvas
 }
 
-export function randomCoordinate(
+export const randomCoordinate = (
   width: number,
   height: number,
-): [number, number] {
+): [number, number] => {
   return [Math.floor(Math.random() * width), Math.floor(Math.random() * height)]
 }
 
-function randomItem<T>(items: T[]): T {
+const randomItem = <T>(items: T[]): T => {
   return items[Math.floor(Math.random() * items.length)]
 }
 
-function scatter(
+const scatter = (
   ctx: CanvasRenderingContext2D,
   image: HTMLImageElement,
   scaleFactor: number,
-): void {
+): void => {
   const [x, y] = randomCoordinate(ctx.canvas.width, ctx.canvas.height)
   ctx.drawImage(
     image,
@@ -71,7 +71,7 @@ function scatter(
   )
 }
 
-export async function render(): Promise<void> {
+export const render = async (): Promise<void> => {
   const backgroundUrl = randomItem(backgroundUrls)
   const backgroundSpriteScaleFactor =
     BACKGROUND_SPRITE_SCALE_FACTORS[fileName(backgroundUrl)] ?? 1
@@ -101,7 +101,7 @@ export async function render(): Promise<void> {
   scatter(ctx, target, targetScale(scaleFactor, backgroundSpriteScaleFactor))
 }
 
-export function init(): void {
+export const init = (): void => {
   console.log('init')
   const renderWhenLoaded = () => void render()
   if (document.readyState === 'complete') {
