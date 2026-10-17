@@ -54,7 +54,7 @@ describe('spriteCount', () => {
     expect(spriteCount(0.5)).toBe(SPRITES_PER_SCREEN / 2)
   })
 
-  it('rounds a fractional count up, the way dotimes did', () => {
+  it('rounds a fractional count up', () => {
     expect(spriteCount(0.875)).toBe(263)
     expect(spriteCount(0)).toBe(0)
   })

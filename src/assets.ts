@@ -68,10 +68,7 @@ export function targetScale(
   return TARGET_SCALE * backgroundScaleFactor * backgroundSpriteScaleFactor
 }
 
-/**
- * How many sprites to scatter over the background. Rounds up, which is what
- * the ClojureScript `dotimes` did with a fractional count.
- */
+/** How many sprites to scatter over the background. Rounds up. */
 export function spriteCount(backgroundScaleFactor: number): number {
   return Math.ceil(SPRITES_PER_SCREEN * backgroundScaleFactor)
 }
