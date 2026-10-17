@@ -101,7 +101,6 @@ export const render = async (): Promise<void> => {
 }
 
 export const init = (): void => {
-  console.log('init')
   const renderWhenLoaded = () => void render()
   if (document.readyState === 'complete') {
     renderWhenLoaded()
@@ -113,8 +112,5 @@ export const init = (): void => {
 init()
 
 if (import.meta.hot) {
-  import.meta.hot.accept(() => {
-    console.log('reload')
-    void render()
-  })
+  import.meta.hot.accept(() => void render())
 }
